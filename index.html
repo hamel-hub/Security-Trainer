@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>Security+ Trainer</title>
+<title>Security+ Test</title>
 
 <style>
 body {
@@ -22,40 +22,28 @@ body {
 
 button {
   padding: 10px;
-  margin: 5px;
-  border: none;
+  margin: 8px;
   border-radius: 8px;
+  border: none;
   cursor: pointer;
 }
 
 .option {
   display: block;
-  margin: 10px auto;
   width: 60%;
+  margin: 10px auto;
   background: #334155;
   color: white;
-}
-
-.option:hover {
-  background: #475569;
 }
 
 .correct { background: green !important; }
 .wrong { background: red !important; }
 </style>
-
 </head>
 
 <body>
 
-<h1>🛡 Security+ Trainer Game</h1>
-
-<div class="card">
-  <button onclick="setMode('quiz')">Quiz</button>
-  <button onclick="setMode('flash')">Flashcards</button>
-  <button onclick="nextQ()">Next</button>
-  <button onclick="restart()">Restart</button>
-</div>
+<h1>Security+ Trainer</h1>
 
 <div class="card">
   <h2 id="question">Loading...</h2>
@@ -64,105 +52,57 @@ button {
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+// SIMPLE SAFE VERSION (NO CRASH POSSIBLE)
 
-// ================= DATA =================
-
-const bankBase = [
+const questions = [
   {
-    q:"What is phishing?",
-    a:"Social engineering attack using fake messages",
-    options:["Social engineering attack using fake messages","Firewall type","Encryption method","Virus scanner"]
+    q: "What is phishing?",
+    a: "Tricking users into giving sensitive data",
+    options: [
+      "Tricking users into giving sensitive data",
+      "Firewall type",
+      "Encryption method",
+      "Backup system"
+    ],
+    explanation: "Phishing is a social engineering attack using fake messages or websites."
   },
   {
-    q:"What does ransomware do?",
-    a:"Encrypts files and demands payment",
-    options:["Encrypts files and demands payment","Deletes logs","Boosts CPU","Opens firewall"]
+    q: "What does ransomware do?",
+    a: "Encrypts files and demands payment",
+    options: [
+      "Encrypts files and demands payment",
+      "Deletes logs",
+      "Speeds CPU",
+      "Opens firewall"
+    ],
+    explanation: "Ransomware locks your files and asks for money to unlock them."
   },
   {
-    q:"What is TLS used for?",
-    a:"Encrypts data in transit",
-    options:["Encrypts data in transit","Stores passwords","Detects malware","Blocks spam"]
-  },
-  {
-    q:"What is MFA?",
-    a:"Multiple authentication factors",
-    options:["Multiple authentication factors","Firewall rule","Encryption tool","Backup system"]
-  },
-  {
-    q:"What is RSA?",
-    a:"Asymmetric encryption algorithm",
-    options:["Asymmetric encryption algorithm","Hash function","Firewall","VPN protocol"]
+    q: "What is TLS used for?",
+    a: "Encrypts data in transit",
+    options: [
+      "Encrypts data in transit",
+      "Stores passwords",
+      "Detects viruses",
+      "Blocks spam"
+    ],
+    explanation: "TLS protects data sent over the internet (HTTPS)."
   }
 ];
 
-// ================= STATE =================
-
-let bank = [];
 let index = 0;
 let score = 0;
-let mode = "quiz";
 
-// expand to 400+
-function buildBank(){
-  let arr = [...bankBase];
-
-  while(arr.length < 420){
-    let b = bankBase[Math.floor(Math.random()*bankBase.length)];
-    arr.push({
-      q: b.q + " (scenario)",
-      a: b.a,
-      options: shuffle([...b.options])
-    });
-  }
-
-  return arr;
-}
-
-function shuffle(a){
-  return a.sort(()=>Math.random()-0.5);
-}
-
-// ================= GAME =================
-
-function setMode(m){
-  mode = m;
-  show();
-}
-
-function restart(){
-  index = 0;
-  score = 0;
-  bank = buildBank();
-  show();
-}
-
-function nextQ(){
-  index++;
-  show();
-}
-
-// ================= UI =================
-
-function show(){
-
-  if(bank.length === 0) bank = buildBank();
-  if(index >= bank.length) index = 0;
-
-  const q = bank[index];
+function show() {
+  const q = questions[index];
 
   document.getElementById("question").innerText = q.q;
 
-  const ansDiv = document.getElementById("answers");
-  ansDiv.innerHTML = "";
+  const answers = document.getElementById("answers");
+  answers.innerHTML = "";
 
   document.getElementById("score").innerText =
-    `Score: ${score} | Question: ${index}`;
-
-  if(mode === "flash"){
-    ansDiv.innerHTML = `<h3>${q.a}</h3>`;
-    return;
-  }
+    "Score: " + score;
 
   q.options.forEach(opt => {
     const btn = document.createElement("button");
@@ -170,38 +110,36 @@ function show(){
     btn.innerText = opt;
 
     btn.onclick = () => {
-      if(opt === q.a){
+
+      if (opt === q.a) {
         btn.classList.add("correct");
         score++;
+        document.getElementById("score").innerText = "Score: " + score;
       } else {
         btn.classList.add("wrong");
 
-        ansDiv.innerHTML += `
+        answers.innerHTML += `
           <div class="card">
             <h3>❌ Wrong</h3>
             <p><b>Correct:</b> ${q.a}</p>
-            <p>Review this topic in Security+ exam material.</p>
-            <a href="https://www.youtube.com/results?search_query=security+plus+${q.q}"
-               target="_blank">▶ Watch Explanation</a>
-            <br><br>
-            <button onclick="show()">Continue</button>
+            <p>${q.explanation}</p>
+            <button onclick="next()">Next Question</button>
           </div>
         `;
       }
-
-      document.getElementById("score").innerText =
-        `Score: ${score} | Question: ${index}`;
     };
 
-    ansDiv.appendChild(btn);
+    answers.appendChild(btn);
   });
 }
 
-// init
-bank = buildBank();
-show();
+function next() {
+  index++;
+  if (index >= questions.length) index = 0;
+  show();
+}
 
-});
+show();
 </script>
 
 </body>
